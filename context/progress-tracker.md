@@ -9,11 +9,12 @@ change.
 
 ## Current Goal
 
-- Feature spec 02 (TBD)
+- Feature spec 03 (auth)
 
 ## Completed
 
 - `01-design-system.md` — shadcn/ui installed and configured (Tailwind v4); UI primitives added (Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea); lucide-react installed; `lib/utils.ts` created with `cn()` helper; `app/globals.css` set up with full dark theme CSS tokens and `@theme inline` Tailwind mappings for project design tokens.
+- `02-editor.md` — Editor chrome shell: `EditorNavbar` (fixed top bar, `PanelLeftOpen`/`PanelLeftClose` sidebar toggle, `isSidebarOpen`/`onSidebarToggle` props) and `ProjectSidebar` (fixed floating overlay, slides in from left, My Projects / Shared tabs with empty states, New Project button). Both in `components/editor/`. No TypeScript errors.
 
 ## In Progress
 
@@ -21,7 +22,7 @@ change.
 
 ## Next Up
 
-- Feature spec 02 (TBD)
+- Feature spec 03 (auth)
 
 ## Open Questions
 
