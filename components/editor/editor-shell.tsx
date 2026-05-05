@@ -10,13 +10,16 @@ import {
   RenameProjectDialog,
   DeleteProjectDialog,
 } from "@/components/editor/project-dialogs"
-import { useProjectDialogs } from "@/hooks/use-project-dialogs"
+import { useProjectActions } from "@/hooks/use-project-actions"
+import type { ProjectData } from "@/lib/projects"
 
 interface EditorShellProps {
   children: React.ReactNode
+  ownedProjects: ProjectData[]
+  sharedProjects: ProjectData[]
 }
 
-export function EditorShell({ children }: EditorShellProps) {
+export function EditorShell({ children, ownedProjects, sharedProjects }: EditorShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const {
     projects,
@@ -27,11 +30,12 @@ export function EditorShell({ children }: EditorShellProps) {
     formName,
     setFormName,
     selectedProject,
+    roomIdPreview,
     openCreate,
     openRename,
     openDelete,
     closeDialog,
-  } = useProjectDialogs()
+  } = useProjectActions(ownedProjects, sharedProjects)
 
   return (
     <ProjectDialogsContext.Provider value={{ openCreate }}>
@@ -53,6 +57,7 @@ export function EditorShell({ children }: EditorShellProps) {
         name={formName}
         onNameChange={setFormName}
         onSubmit={createProject}
+        roomIdPreview={roomIdPreview}
       />
       <RenameProjectDialog
         open={dialog === "rename"}

@@ -10,11 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import type { Project } from "@/hooks/use-project-dialogs"
-
-function toSlug(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
-}
+import type { Project } from "@/hooks/use-project-actions"
 
 // ── Create Project ────────────────────────────────────────────────────────
 
@@ -24,11 +20,10 @@ interface CreateProjectDialogProps {
   name: string
   onNameChange: (name: string) => void
   onSubmit: (name: string) => void
+  roomIdPreview: string
 }
 
-export function CreateProjectDialog({ open, onClose, name, onNameChange, onSubmit }: CreateProjectDialogProps) {
-  const slug = toSlug(name)
-
+export function CreateProjectDialog({ open, onClose, name, onNameChange, onSubmit, roomIdPreview }: CreateProjectDialogProps) {
   function handleCreate() {
     onSubmit(name)
     onClose()
@@ -50,8 +45,8 @@ export function CreateProjectDialog({ open, onClose, name, onNameChange, onSubmi
             onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) handleCreate() }}
             className="text-copy-primary placeholder:text-copy-muted"
           />
-          {slug && (
-            <p className="font-mono text-xs text-copy-muted">/{slug}</p>
+          {roomIdPreview && (
+            <p className="font-mono text-xs text-copy-muted">/{roomIdPreview}</p>
           )}
         </div>
         <div className="flex justify-end gap-2 pt-2">
