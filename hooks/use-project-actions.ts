@@ -40,14 +40,16 @@ export function useProjectActions(
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [pendingSuffix, setPendingSuffix] = useState("")
+  const [error, setError] = useState<Error | null>(null)
 
   const slug = toSlug(formName)
   const roomIdPreview = slug ? `${slug}-${pendingSuffix}` : ""
 
-  async function createProject(name: string) {
+  async function createProject(name: string): Promise<boolean> {
     const trimmed = name.trim()
-    if (!trimmed || isLoading) return
+    if (!trimmed || isLoading) return false
     setIsLoading(true)
+    setError(null)
     try {
       const nameSlug = toSlug(trimmed)
       const roomId = nameSlug ? `${nameSlug}-${pendingSuffix}` : pendingSuffix
@@ -56,37 +58,64 @@ export function useProjectActions(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: trimmed, id: roomId }),
       })
-      if (!res.ok) throw new Error("Failed to create project")
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(new Error(data?.error || "Failed to create project"))
+        // Optionally: toast?.error(data?.error || "Failed to create project")
+        return false
+      }
       const { project } = (await res.json()) as { project: { id: string } }
       router.push(`/editor/${project.id}`)
+      return true
+    } catch (err: any) {
+      setError(err)
+      // Optionally: toast?.error(err.message)
+      return false
     } finally {
       setIsLoading(false)
     }
   }
 
-  async function renameProject(id: string, name: string) {
+  async function renameProject(id: string, name: string): Promise<boolean> {
     const trimmed = name.trim()
-    if (!trimmed || isLoading) return
+    if (!trimmed || isLoading) return false
     setIsLoading(true)
+    setError(null)
     try {
       const res = await fetch(`/api/projects/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: trimmed }),
       })
-      if (!res.ok) throw new Error("Failed to rename project")
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(new Error(data?.error || "Failed to rename project"))
+        // Optionally: toast?.error(data?.error || "Failed to rename project")
+        return false
+      }
       router.refresh()
+      return true
+    } catch (err: any) {
+      setError(err)
+      // Optionally: toast?.error(err.message)
+      return false
     } finally {
       setIsLoading(false)
     }
   }
 
-  async function deleteProject(id: string) {
-    if (isLoading) return
+  async function deleteProject(id: string): Promise<boolean> {
+    if (isLoading) return false
     setIsLoading(true)
+    setError(null)
     try {
       const res = await fetch(`/api/projects/${id}`, { method: "DELETE" })
-      if (!res.ok) throw new Error("Failed to delete project")
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(new Error(data?.error || "Failed to delete project"))
+        // Optionally: toast?.error(data?.error || "Failed to delete project")
+        return false
+      }
       const activeId = Array.isArray(params?.projectId)
         ? params.projectId[0]
         : (params?.projectId as string | undefined)
@@ -95,6 +124,11 @@ export function useProjectActions(
       } else {
         router.refresh()
       }
+      return true
+    } catch (err: any) {
+      setError(err)
+      // Optionally: toast?.error(err.message)
+      return false
     } finally {
       setIsLoading(false)
     }
@@ -135,6 +169,7 @@ export function useProjectActions(
     setFormName,
     selectedProject,
     isLoading,
+    error,
     roomIdPreview,
     openCreate,
     openRename,

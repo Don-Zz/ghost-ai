@@ -84,6 +84,7 @@ export function ProjectSidebar({
             variant="ghost"
             size="icon-sm"
             onClick={onClose}
+            aria-label="Close sidebar"
             className="text-copy-muted hover:text-copy-primary"
           >
             <X className="h-4 w-4" />

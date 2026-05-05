@@ -27,13 +27,31 @@ export async function POST(request: NextRequest) {
   const name = rawName || "Untitled Project"
   const rawId = typeof body?.id === "string" ? body.id.trim() : undefined
 
-  const project = await prisma.project.create({
-    data: {
-      ...(rawId ? { id: rawId } : {}),
-      ownerId: userId,
-      name,
-    },
-  })
+  // Validate rawId if provided: only allow lowercase letters, numbers, hyphens, 3-32 chars
+  let id: string | undefined = undefined
+  if (rawId) {
+    const idPattern = /^[a-z0-9-]{3,32}$/
+    if (!idPattern.test(rawId)) {
+      return Response.json({ error: "Invalid project id format" }, { status: 400 })
+    }
+    id = rawId
+  }
 
-  return Response.json({ project }, { status: 201 })
+  try {
+    const project = await prisma.project.create({
+      data: {
+        ...(id ? { id } : {}),
+        ownerId: userId,
+        name,
+      },
+    })
+    return Response.json({ project }, { status: 201 })
+  } catch (err: any) {
+    // Prisma unique constraint error
+    if (err?.code === "P2002") {
+      return Response.json({ error: "Project id already exists" }, { status: 409 })
+    }
+    console.error("Project creation error:", err)
+    return Response.json({ error: "Internal server error" }, { status: 500 })
+  }
 }
