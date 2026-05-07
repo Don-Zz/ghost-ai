@@ -133,3 +133,42 @@
     @apply font-sans;
   }
 }
+
+/* ─── ReactFlow dark theme overrides ─── */
+.react-flow {
+  background: var(--bg-base);
+}
+.react-flow__attribution {
+  display: none;
+}
+.react-flow__minimap {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-default) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+/* Custom canvas node — strip React Flow's default border/padding/radius so
+   our shape components own 100% of the visual presentation */
+.react-flow__node-canvasNode {
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  /* Keep overflow visible so handles (centered on edges) aren't clipped */
+  overflow: visible !important;
+}
+
+/* Handles: hidden by default, visible on node hover or selection */
+.react-flow__node .react-flow__handle {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border: 2px solid var(--bg-base);
+}
+.react-flow__node:hover .react-flow__handle,
+.react-flow__node.selected .react-flow__handle {
+  opacity: 1;
+}

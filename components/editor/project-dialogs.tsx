@@ -19,14 +19,14 @@ interface CreateProjectDialogProps {
   onClose: () => void
   name: string
   onNameChange: (name: string) => void
-  onSubmit: (name: string) => void
+  onSubmit: (name: string) => Promise<boolean>
   roomIdPreview: string
 }
 
 export function CreateProjectDialog({ open, onClose, name, onNameChange, onSubmit, roomIdPreview }: CreateProjectDialogProps) {
-  function handleCreate() {
-    onSubmit(name)
-    onClose()
+  async function handleCreate() {
+    const success = await onSubmit(name)
+    if (success) onClose()
   }
 
   return (
