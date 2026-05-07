@@ -88,6 +88,7 @@ export function ShareDialog({ open, onOpenChange, project, isOwner }: ShareDialo
       setEmail("")
     } finally {
       setInviting(false)
+    }
   }
 
   async function handleRemove(targetEmail: string) {
@@ -109,8 +110,6 @@ export function ShareDialog({ open, onOpenChange, project, isOwner }: ShareDialo
       setError("Failed to remove collaborator")
     } finally {
       setRemoving((prev) => ({ ...prev, [targetEmail]: false }))
-  }
-
     }
   }
 
@@ -137,9 +136,7 @@ export function ShareDialog({ open, onOpenChange, project, isOwner }: ShareDialo
     }
   }
 
-  function handleRemove(email: string): void {
-    throw new Error("Function not implemented.")
-  }
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

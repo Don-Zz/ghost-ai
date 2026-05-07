@@ -172,3 +172,49 @@
 .react-flow__node.selected .react-flow__handle {
   opacity: 1;
 }
+
+/* NodeResizer handle hover — base style is set via handleStyle prop on NodeResizer */
+.react-flow__resize-control.handle:hover {
+  border-color: var(--accent-primary) !important;
+  background: var(--bg-surface) !important;
+}
+
+/* Edge label pill badge */
+.canvas-edge-label {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Faint hint shown on active edges with no label */
+.canvas-edge-hint {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  color: var(--text-faint);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Inline label editing input */
+.canvas-edge-input {
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent-primary);
+  border-radius: 20px;
+  outline: none;
+  min-width: 60px;
+  text-align: center;
+  caret-color: var(--accent-primary);
+}

@@ -1,29 +1,43 @@
 "use client"
 
-import { useCallback } from "react"
-import { ReactFlow, MiniMap, Background, BackgroundVariant, useReactFlow } from "@xyflow/react"
+import { useCallback, useEffect } from "react"
+import { ReactFlow, Background, BackgroundVariant, useReactFlow, ConnectionMode } from "@xyflow/react"
 import { useLiveblocksFlow, Cursors } from "@liveblocks/react-flow"
+import { useHistory } from "@liveblocks/react"
 import "@xyflow/react/dist/style.css"
 import "@liveblocks/react-ui/styles.css"
 import "@liveblocks/react-flow/styles.css"
 
-import { NODE_COLORS, NODE_TYPES } from "@/types/canvas"
+import { NODE_COLORS, NODE_TYPES, EDGE_TYPES } from "@/types/canvas"
 import type { CanvasNode } from "@/types/canvas"
 import { CanvasNodeRenderer } from "@/components/editor/canvas-node"
+import { CanvasEdgeRenderer } from "@/components/editor/canvas-edge"
 import { ShapePanel } from "@/components/editor/shape-panel"
 import type { ShapeDragPayload } from "@/components/editor/shape-panel"
+import { CanvasControlBar } from "@/components/editor/canvas-control-bar"
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
+import type { CanvasTemplate } from "@/components/editor/starter-templates"
 
 const nodeTypes = {
   [NODE_TYPES.canvasNode]: CanvasNodeRenderer,
 }
 
+const edgeTypes = {
+  [EDGE_TYPES.canvasEdge]: CanvasEdgeRenderer,
+}
+
 const defaultEdgeOptions = {
-  style: { stroke: "#f8fafc", strokeWidth: 1.5 },
+  type: EDGE_TYPES.canvasEdge,
 }
 
 let nodeCounter = 0
 
-export function Canvas() {
+interface CanvasProps {
+  pendingTemplate?: CanvasTemplate | null
+  onTemplateClear?: () => void
+}
+
+export function Canvas({ pendingTemplate, onTemplateClear }: CanvasProps) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } =
     useLiveblocksFlow({
       suspense: true,
@@ -31,7 +45,20 @@ export function Canvas() {
       edges: { initial: [] },
     })
 
-  const { addNodes, screenToFlowPosition } = useReactFlow()
+  const reactFlow = useReactFlow()
+  const { addNodes, setNodes, setEdges, screenToFlowPosition } = reactFlow
+  const { undo, redo, canUndo, canRedo } = useHistory()
+
+  useKeyboardShortcuts({ instance: reactFlow, onUndo: undo, onRedo: redo })
+
+  useEffect(() => {
+    if (!pendingTemplate) return
+    setNodes(pendingTemplate.nodes)
+    setEdges(pendingTemplate.edges)
+    onTemplateClear?.()
+    setTimeout(() => reactFlow.fitView({ duration: 400, padding: 0.1 }), 80)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingTemplate])
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -81,8 +108,10 @@ export function Canvas() {
         onConnect={onConnect}
         onDelete={onDelete}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         colorMode="dark"
         defaultEdgeOptions={defaultEdgeOptions}
+        connectionMode={ConnectionMode.Loose}
         connectOnClick={false}
         panOnScroll
         fitView
@@ -90,16 +119,9 @@ export function Canvas() {
         onDrop={onDrop}
       >
         <Cursors />
-        <MiniMap
-          style={{
-            background: "#111114",
-            border: "1px solid #2a2a30",
-            borderRadius: "12px",
-          }}
-          maskColor="rgba(8,8,9,0.7)"
-        />
         <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="#3a3a42" />
       </ReactFlow>
+      <CanvasControlBar onUndo={undo} onRedo={redo} canUndo={canUndo()} canRedo={canRedo()} />
       <ShapePanel />
     </div>
   )

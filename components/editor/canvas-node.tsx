@@ -1,11 +1,15 @@
 "use client"
 
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { useState, useRef, useCallback, useEffect } from "react"
+import { Handle, Position, NodeResizer, useReactFlow, type NodeProps } from "@xyflow/react"
 import { NODE_COLORS } from "@/types/canvas"
 import type { CanvasNode, NodeShape } from "@/types/canvas"
+import { NodeColorToolbar } from "@/components/editor/node-color-toolbar"
 
 const DEFAULT_FILL = NODE_COLORS[0].fill
 const DEFAULT_TEXT = NODE_COLORS[0].text
+const MIN_WIDTH = 60
+const MIN_HEIGHT = 40
 
 interface ShapeProps {
   fill: string
@@ -122,9 +126,26 @@ const SHAPE_COMPONENTS: Record<NodeShape, React.ComponentType<ShapeProps>> = {
   cylinder: ShapeCylinder,
 }
 
+const RESIZER_HANDLE_STYLE: React.CSSProperties = {
+  width: 8,
+  height: 8,
+  borderRadius: 2,
+  background: "#18181c",
+  border: "1.5px solid #3a3a42",
+}
+
+const RESIZER_LINE_STYLE: React.CSSProperties = {
+  borderColor: "transparent",
+}
+
 // ─── Node renderer ────────────────────────────────────────────────
 
-export function CanvasNodeRenderer({ data, selected }: NodeProps<CanvasNode>) {
+export function CanvasNodeRenderer({ id, data, selected }: NodeProps<CanvasNode>) {
+  const [editing, setEditing] = useState(false)
+  const [localLabel, setLocalLabel] = useState("")
+  const inputRef = useRef<HTMLInputElement>(null)
+  const { updateNodeData } = useReactFlow()
+
   const colorPair = NODE_COLORS.find((c) => c.fill === data.color)
   const fill = colorPair?.fill ?? DEFAULT_FILL
   const text = colorPair?.text ?? DEFAULT_TEXT
@@ -132,13 +153,81 @@ export function CanvasNodeRenderer({ data, selected }: NodeProps<CanvasNode>) {
   const shape = data.shape ?? "rectangle"
   const ShapeComponent = SHAPE_COMPONENTS[shape] ?? ShapeRectangle
 
+  const startEditing = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setLocalLabel(data.label)
+      setEditing(true)
+    },
+    [data.label],
+  )
+
+  const commitEdit = useCallback(() => {
+    updateNodeData(id, { label: localLabel })
+    setEditing(false)
+  }, [id, localLabel, updateNodeData])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      setEditing(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [editing])
+
   return (
-    <div className="relative h-full w-full">
-      <ShapeComponent fill={fill} text={text} border={border} label={data.label} />
-      <Handle type="target" position={Position.Top} id="top" />
+    <div className="relative h-full w-full" onDoubleClick={startEditing}>
+      {selected && <NodeColorToolbar nodeId={id} activeFill={fill} />}
+
+      <NodeResizer
+        isVisible={selected}
+        minWidth={MIN_WIDTH}
+        minHeight={MIN_HEIGHT}
+        handleStyle={RESIZER_HANDLE_STYLE}
+        lineStyle={RESIZER_LINE_STYLE}
+      />
+
+      <ShapeComponent fill={fill} text={text} border={border} label={editing ? "" : data.label} />
+
+      {/* Placeholder when label is empty and not editing */}
+      {!editing && !data.label && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <span className="text-xs font-medium" style={{ color: `${text}50` }}>
+            Label
+          </span>
+        </div>
+      )}
+
+      {/* Inline label editing — input keeps the label centered without textarea browser chrome */}
+      {editing && (
+        <div
+          className="absolute inset-0 flex items-center justify-center px-3"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <input
+            ref={inputRef}
+            type="text"
+            value={localLabel}
+            onChange={(e) => setLocalLabel(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={handleKeyDown}
+            placeholder="Label"
+            className="w-full border-none bg-transparent text-center text-xs font-medium outline-none"
+            style={{ color: text, caretColor: text }}
+          />
+        </div>
+      )}
+
+      <Handle type="source" position={Position.Top} id="top" />
       <Handle type="source" position={Position.Right} id="right" />
       <Handle type="source" position={Position.Bottom} id="bottom" />
-      <Handle type="target" position={Position.Left} id="left" />
+      <Handle type="source" position={Position.Left} id="left" />
     </div>
   )
 }

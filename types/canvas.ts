@@ -48,5 +48,9 @@ export const EDGE_TYPES = {
   canvasEdge: "canvasEdge",
 } as const
 
+export interface EdgeData extends Record<string, unknown> {
+  label?: string
+}
+
 export type CanvasNode = Node<NodeData, "canvasNode">
-export type CanvasEdge = Edge<Record<string, unknown>, "canvasEdge">
+export type CanvasEdge = Edge<EdgeData, "canvasEdge">
