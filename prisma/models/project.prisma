@@ -10,9 +10,11 @@ model Project {
   description    String?
   status         ProjectStatus         @default(DRAFT)
   canvasJsonPath String?
+  canvasData     Json?
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
   collaborators  ProjectCollaborator[]
+  specs          ProjectSpec[]
 
   @@index([ownerId])
   @@index([createdAt])
@@ -28,4 +30,14 @@ model ProjectCollaborator {
   @@unique([projectId, collaboratorEmail])
   @@index([collaboratorEmail])
   @@index([projectId, createdAt])
+}
+
+model ProjectSpec {
+  id        String   @id @default(cuid())
+  projectId String
+  filePath  String
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
 }

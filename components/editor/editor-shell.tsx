@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useParams } from "next/navigation"
 
 import { EditorNavbar } from "@/components/editor/editor-navbar"
 import { ProjectSidebar } from "@/components/editor/project-sidebar"
@@ -21,6 +22,8 @@ interface EditorShellProps {
 
 export function EditorShell({ children, ownedProjects, sharedProjects }: EditorShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const params = useParams()
+  const activeProjectId = typeof params?.roomId === "string" ? params.roomId : undefined
   const {
     projects,
     createProject,
@@ -50,6 +53,7 @@ export function EditorShell({ children, ownedProjects, sharedProjects }: EditorS
         onNewProject={openCreate}
         onRenameProject={openRename}
         onDeleteProject={openDelete}
+        activeProjectId={activeProjectId}
       />
       <CreateProjectDialog
         open={dialog === "create"}

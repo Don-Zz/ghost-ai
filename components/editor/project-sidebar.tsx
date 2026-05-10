@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Pencil, Plus, Trash2, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -14,17 +15,36 @@ interface ProjectSidebarProps {
   onNewProject: () => void
   onRenameProject: (project: Project) => void
   onDeleteProject: (project: Project) => void
+  activeProjectId?: string
 }
 
 interface ProjectItemProps {
   project: Project
   onRename: () => void
   onDelete: () => void
+  isActive: boolean
 }
 
-function ProjectItem({ project, onRename, onDelete }: ProjectItemProps) {
+function ProjectItem({ project, onRename, onDelete, isActive }: ProjectItemProps) {
+  const router = useRouter()
   return (
-    <div className="group flex items-center rounded-xl px-2 py-1.5 hover:bg-elevated cursor-pointer">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => router.push(`/editor/${project.id}`)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          router.push(`/editor/${project.id}`)
+        } else if (e.key === " ") {
+          e.preventDefault();
+          router.push(`/editor/${project.id}`)
+        }
+      }}
+      className={cn(
+        "group flex items-center rounded-xl px-2 py-1.5 hover:bg-elevated cursor-pointer",
+        isActive && "bg-elevated"
+      )}
+    >
       <span className="flex-1 truncate text-sm text-copy-primary">{project.name}</span>
       {project.isOwned && (
         <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
@@ -57,6 +77,7 @@ export function ProjectSidebar({
   onNewProject,
   onRenameProject,
   onDeleteProject,
+  activeProjectId,
 }: ProjectSidebarProps) {
   const ownedProjects = projects.filter((p) => p.isOwned)
   const sharedProjects = projects.filter((p) => !p.isOwned)
@@ -115,6 +136,7 @@ export function ProjectSidebar({
                       project={project}
                       onRename={() => onRenameProject(project)}
                       onDelete={() => onDeleteProject(project)}
+                      isActive={project.id === activeProjectId}
                     />
                   ))}
                 </div>
@@ -134,6 +156,7 @@ export function ProjectSidebar({
                       project={project}
                       onRename={() => onRenameProject(project)}
                       onDelete={() => onDeleteProject(project)}
+                      isActive={project.id === activeProjectId}
                     />
                   ))}
                 </div>

@@ -11,7 +11,7 @@ Implement the full AI design agent so a user prompt results in real-time updates
    - reuse existing Liveblocks flow and presence patterns instead of creating new ones
 
    Then implement:
-   - use Gemini (`@ai-sdk/google`) to interpret the user prompt
+   - use OpenRouter (`@openrouter/ai-sdk-provider`) to interpret the user prompt
    - update the canvas using the existing collaborative flow utilities
    - support actions like:
      - add node
@@ -36,7 +36,7 @@ Implement the full AI design agent so a user prompt results in real-time updates
 
 ## Dependencies
 
-All packages are already installed.`GOOGLE_AI_API_KEY` is already in `.env.local`.
+All packages are already installed. `OPENROUTER_API_KEY` is already in `.env.local`.
 
 ## Scope Limits
 

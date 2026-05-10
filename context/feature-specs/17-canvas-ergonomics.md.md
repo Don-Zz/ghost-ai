@@ -36,6 +36,7 @@ Add a floating control bar for zoom and undo/redo, then wire the same actions to
    - `Cmd/Ctrl + Z` to undo
    - `Cmd/Ctrl + Shift + Z` to redo
    - `Cmd/Ctrl + Y` to redo
+6. Remove the minimap at the bottom right
 
 ## Scope Limits
 
